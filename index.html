@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>berrer-scroll</title>
+    <!-- <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/better-scroll/dist/bscroll.min.js"></script> -->
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/bscroll.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="wrap">
+            <div class="barrage" ref="wrapper">
+                <div id="barrage_wrap" class="barrage_wrap">
+                    <div class="bar_block" v-for="(item, index) in barrageList" :key="item.id">
+                        <div class="barragediv">
+                            <span class="barrage_name">{{item.name}}：</span>
+                            {{item.text}}-{{item.id}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="newBarrage" v-if="newBarrageList.length>0" @click="getNewBarrage">{{newBarrageList.length}}条新消息
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            i: 0,
+            timer: null,
+            message: 'Hello Vue!',
+            barrageList: [
+                // { name: '万里无云' + 0, text: '主播666*' + 0, id: 0 },
+                // { name: '万里无云' + 1, text: '主播666*' + 1, id: 1 },
+                // { name: '万里无云' + 2, text: '主播666*' + 2, id: 2 },
+                // { name: '万里无云' + 3, text: '主播666*' + 3, id: 3 },
+                // { name: '万里无云' + 4, text: '主播666*' + 4, id: 4 },
+                // { name: '万里无云' + 5, text: '主播666*' + 5, id: 5 },
+                // { name: '万里无云' + 6, text: '主播666*' + 6, id: 6 },
+                // { name: '万里无云' + 7, text: '主播666*' + 7, id: 7 },
+                // { name: '万里无云' + 8, text: '主播666*' + 8, id: 8 },
+                // { name: '万里无云' + 9, text: '主播666*' + 9, id: 9 },
+                // { name: '万里无云' + 10, text: '主播666*' + 10, id: 10 },
+                // { name: '万里无云' + 11, text: '主播666*' + 11, id: 11 },
+                // { name: '万里无云' + 12, text: '主播666*' + 12, id: 12 },
+                // { name: '万里无云' + 13, text: '主播666*' + 13, id: 13 },
+            ],
+            newBarrageList: [],       //新留言
+            isBottom: true,
+            isTouch: false,
+            scroll: null
+        },
+        mounted() {
+            this.initSwiper();
+            this.setBarrage();
+        },
+        methods: {
+            initSwiper() {
+                this.scroll = new BScroll(this.$refs.wrapper, {
+                    scrollY: true,
+                    click: true,
+                    probeType: 3,
+                    mouseWheel: true,
+                    bounce: {
+                        top: true,
+                        bottom: false
+                    },
+                    scrollbar: {
+                        fade: true
+                    }
+                });
+                let that = this;
+                //用户轻抚
+                this.scroll.on("flick", () => {
+                    let barAllH = $(".barrage_wrap").height();
+                    let wrapH = $(".barrage ").height();
+                    if (barAllH > wrapH) {
+                        that.isTouch = true;
+                    }
+                });
+                //滚动中
+                this.scroll.on("scroll", obj => {
+                    let barAllH = $(".barrage_wrap").height();
+                    if (barAllH - 429 <= Math.abs(obj.y)) {
+                        that.isBottom = true;
+                        that.isTouch = false;
+                        if (that.newBarrageList.length) {
+                            that.getNewBarrage();
+                        }
+                    } else if (barAllH - 429 > 0) {
+                        that.isBottom = false;
+                    }
+                });
+            },
+            setBarrage() {
+                // setInterval
+                this.timer = setTimeout(() => {
+                    // 从弹幕池中获取的新的上屏弹幕，可以固定每次最多n条上屏
+                    const upBarrage = [
+                         { name: '万里无云' + this.i, text: '主播666*' + this.i++, id: this.i },
+                         { name: '万里无云' + this.i, text: '主播666*' + this.i++, id: this.i }
+                    ]
+                    this.dataPush(upBarrage)
+                    this.setBarrage()
+                }, 500);
+            },
+            //设置滚动条滚动至底
+            setScrollTop() {
+                let Lis = $(".bar_block"); // 查找所有bar_block元素
+
+                const h = $(".barrage_wrap").height();
+                console.log('容器高度：', h, '元素个数：', Lis.length);
+                this.scroll.refresh();
+                // this.scroll.scrollTo(0, -h + 429, 300); // 滑动到最底部,设置动画300ms
+                this.scroll.scrollToElement(Lis[Lis.length - 1], 300); // 滑动到指定元素,设置动画300ms
+                const len = this.barrageList.length;
+
+                // 限制弹幕超过20条时，固定15条，优化性能
+                if (len > 20) {
+                    setTimeout(() => {
+                        this.barrageList.splice(0, len - 15)
+                    }, 400)
+                }
+
+            },
+            //数据获取
+            dataPush(data) {
+                console.log(this.isBottom, this.isTouch);
+                if (this.isBottom && !this.isTouch) {
+                    this.barrageList = [...this.barrageList, ...data];
+                    this.$nextTick(() => {
+                        this.setScrollTop();
+                    });
+                } else {
+                    this.newBarrageList =this.newBarrageList.concat(data);
+                    // this.$set(this.newBarrageList, this.newBarrageList.length, ...data);
+                }
+            },
+            //读取新消息
+            getNewBarrage() {
+                clearTimeout(this.timer) // 拼接滚动到展开的新弹幕时，停止读取上屏弹幕
+                this.barrageList = [...this.barrageList, ...this.newBarrageList];
+                this.newBarrageList = [];
+                this.isBottom = true;
+                this.$nextTick(() => {
+                    this.setScrollTop();
+                    this.setBarrage() // 拼接滚动完成后，继续上屏弹幕
+                });
+            }
+        }
+    })
+</script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .wrap {
+        width: 800px;
+        height: 450px;
+        left: 50%;
+        top: 50%;
+        position: fixed;
+        overflow: hidden;
+        transform: translate(-50%, -50%);
+    }
+
+    .barrage {
+        width: 800px;
+        font-size: 24px;
+        height: 450px;
+        padding: 20px;
+        z-index: 99;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        bottom: 0;
+        transition: all 0.3s;
+        overflow-y: auto;
+        -ms-overflow-style: none;
+        overflow: -moz-scrollbars-none;
+
+    }
+
+    .barrage::-webkit-scrollbar {
+        width: 0 !important;
+    }
+
+    .barrage .scrollstyle {
+        width: 50% !important;
+        left: 50% !important;
+        margin-left: -25% !important;
+    }
+
+    .barrage .bar_block {
+        padding-bottom: 10px;
+        max-width: 500px;
+
+    }
+
+    .barrage_wrap {
+        position: absolute;
+    }
+
+    .barrage .barragediv {
+        word-wrap: break-word;
+        /*在长单词或URL地址内部进行换行，防止过长导致自动换行 */
+        word-break: break-all;
+        /*允许再单词内换行*/
+        display: inline-block;
+        max-width: 500px;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 3px;
+        line-height: 46px;
+        padding: 0 10px;
+    }
+
+    .barrage .barragediv .barrage_name {
+        color: #ffbb7e;
+    }
+
+    .newBarrage {
+        display: inline-block;
+        color: #f85b0f;
+        position: absolute;
+        font-size: 24px;
+        padding: 0 19px;
+        border-radius: 3px;
+        bottom: 0;
+        height: 56px;
+        z-index: 99;
+        line-height: 56px;
+        background: #fff;
+        left: 20px;
+        letter-spacing: 1px;
+    }
+</style>
