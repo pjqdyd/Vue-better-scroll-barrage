@@ -1,6 +1,7 @@
 
 #### Vue + BetterScroll + jquery 竖屏直播滚动弹幕实现
 
+##### 演示地址：[Demo演示](https://pjqdyd.github.io/Vue-better-scroll-barrage/)
 
 1. 参考了[这个实现](https://www.jq22.com/jquery-info23018)
 
