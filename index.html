@@ -40,22 +40,7 @@
             i: 0,
             timer: null,
             message: 'Hello Vue!',
-            barrageList: [
-                // { name: '万里无云' + 0, text: '主播666*' + 0, id: 0 },
-                // { name: '万里无云' + 1, text: '主播666*' + 1, id: 1 },
-                // { name: '万里无云' + 2, text: '主播666*' + 2, id: 2 },
-                // { name: '万里无云' + 3, text: '主播666*' + 3, id: 3 },
-                // { name: '万里无云' + 4, text: '主播666*' + 4, id: 4 },
-                // { name: '万里无云' + 5, text: '主播666*' + 5, id: 5 },
-                // { name: '万里无云' + 6, text: '主播666*' + 6, id: 6 },
-                // { name: '万里无云' + 7, text: '主播666*' + 7, id: 7 },
-                // { name: '万里无云' + 8, text: '主播666*' + 8, id: 8 },
-                // { name: '万里无云' + 9, text: '主播666*' + 9, id: 9 },
-                // { name: '万里无云' + 10, text: '主播666*' + 10, id: 10 },
-                // { name: '万里无云' + 11, text: '主播666*' + 11, id: 11 },
-                // { name: '万里无云' + 12, text: '主播666*' + 12, id: 12 },
-                // { name: '万里无云' + 13, text: '主播666*' + 13, id: 13 },
-            ],
+            barrageList: [],
             newBarrageList: [],       //新留言
             isBottom: true,
             isTouch: false,
@@ -107,13 +92,14 @@
                 // setInterval
                 this.timer = setTimeout(() => {
                     // 从弹幕池中获取的新的上屏弹幕，可以固定每次最多n条上屏
+                    // 注意弹幕上屏的时间要大于过渡动画以及删除弹幕的时间，否则会引起闪屏
                     const upBarrage = [
-                         { name: '万里无云' + this.i, text: '主播666*' + this.i++, id: this.i },
-                         { name: '万里无云' + this.i, text: '主播666*' + this.i++, id: this.i }
+                         { name: '万里无云' + this.i, text: '主播666', id: this.i++ },
+                         { name: '万里无云' + this.i, text: '主播666', id: this.i++ },
                     ]
                     this.dataPush(upBarrage)
                     this.setBarrage()
-                }, 500);
+                }, 700);
             },
             //设置滚动条滚动至底
             setScrollTop() {
@@ -123,14 +109,15 @@
                 console.log('容器高度：', h, '元素个数：', Lis.length);
                 this.scroll.refresh();
                 // this.scroll.scrollTo(0, -h + 429, 300); // 滑动到最底部,设置动画300ms
-                this.scroll.scrollToElement(Lis[Lis.length - 1], 300); // 滑动到指定元素,设置动画300ms
+                this.scroll.scrollToElement(Lis[Lis.length - 1], 400); // 滑动到指定元素,设置动画400ms
                 const len = this.barrageList.length;
 
                 // 限制弹幕超过20条时，固定15条，优化性能
+                // 删除多余的弹幕
                 if (len > 20) {
                     setTimeout(() => {
                         this.barrageList.splice(0, len - 15)
-                    }, 400)
+                    }, 500)
                 }
 
             },
@@ -169,7 +156,7 @@
     }
 
     .wrap {
-        width: 800px;
+        width: 400px;
         height: 450px;
         left: 50%;
         top: 50%;
@@ -179,7 +166,7 @@
     }
 
     .barrage {
-        width: 800px;
+        width: 400px;
         font-size: 24px;
         height: 450px;
         padding: 20px;
@@ -187,7 +174,7 @@
         border: 1px solid #ccc;
         border-radius: 5px;
         bottom: 0;
-        transition: all 0.3s;
+        transition: all 0.4s;
         overflow-y: auto;
         -ms-overflow-style: none;
         overflow: -moz-scrollbars-none;
@@ -206,7 +193,7 @@
 
     .barrage .bar_block {
         padding-bottom: 10px;
-        max-width: 500px;
+        max-width: 400px;
 
     }
 
@@ -220,7 +207,7 @@
         word-break: break-all;
         /*允许再单词内换行*/
         display: inline-block;
-        max-width: 500px;
+        max-width: 400px;
         color: #fff;
         background: rgba(0, 0, 0, 0.4);
         border-radius: 3px;
